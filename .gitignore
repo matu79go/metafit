@@ -51,3 +51,4 @@ Thumbs.db
 weights/
 test_datas/
 test_results/
+*ipynb*

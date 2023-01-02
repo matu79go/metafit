@@ -12,6 +12,7 @@ import src.legacy as legacy
 import src.utils as utils
 import src.generate_keypoints as generate_keypoints
 import src.graphonomy.generate_parsing as generate_parsing
+import src.preprocess as peroprocess
 
 
 def main() -> None:
@@ -20,6 +21,10 @@ def main() -> None:
     device = torch.device("cuda")
     outdir = config["outdir"]
     testpart = config["testpart"]
+    print("Preprocessing images ...")
+    peroprocess.main(
+        data_dir=os.path.join(config["dataroot"], config["image_dir"]),
+    )
     print("Generating keypoints ...")
     generate_keypoints.main(
         data_dir=os.path.join(config["dataroot"], config["image_dir"]),
