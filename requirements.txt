@@ -1,0 +1,14 @@
+tqdm
+pyspng
+ninja
+imageio-ffmpeg==0.4.3
+psutil
+scipy
+matplotlib
+scikit-image==0.18.3
+pycocotools
+
+opencv-python
+mmpose
+
+networkx
