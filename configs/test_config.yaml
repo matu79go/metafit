@@ -1,0 +1,13 @@
+dataroot: test_datas
+testtxt: test_pairs.txt
+network: weights/pasta-gan++/network-snapshot-004408.pkl
+outdir: test_results/full
+batchsize: 1
+testpart: full
+use_sleeve_mask: false
+
+image_dir: image
+keypoints_dir: keypoints
+parsing_dir: parsing
+pose_model_path: weights/openpose/body_pose_model.pth
+parsing_model_path: weights/graphonomy/inference.pth
