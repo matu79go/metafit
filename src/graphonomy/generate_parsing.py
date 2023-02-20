@@ -1,6 +1,7 @@
 import os
 
 import torch
+
 # import tqdm
 
 from src.graphonomy.infer import inference
@@ -26,7 +27,7 @@ def main(data_dir: str, out_dir: str, model_path: str) -> None:
             net=net,
             img_path=os.path.join(data_dir, image),
             output_path=out_dir,
-            output_name=image.split('.')[0],
+            output_name=image.split(".")[0],
             use_gpu=True,
         )
 

@@ -215,9 +215,7 @@ def inference(
 
     parsing_im = Image.fromarray(vis_res[0])
     parsing_im.save(output_path + "/{}_color.png".format(output_name))
-    cv2.imwrite(
-        output_path + "/{}.png".format(output_name), results[0, :, :]
-    )
+    cv2.imwrite(output_path + "/{}.png".format(output_name), results[0, :, :])
 
     end_time = timeit.default_timer()
     print(
