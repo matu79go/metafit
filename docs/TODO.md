@@ -1,40 +1,49 @@
 # META FIT - TODO
 
-## Phase 1: Nano Banana 試着テスト
+## Phase 1: 段階的な精度向上（Nano Banana のみ → 中間処理追加）
 
-### Step 1: Nano Banana Pro (Gemini 3 Pro) で試着テスト ← 今ここ
-- [x] Nano Banana 調査 (docs/05_nano_banana_research.md)
-- [ ] Google AI Studio で API Key 取得
-- [ ] Nano Banana Pro (`gemini-3-pro-image-preview`) で簡易試着テスト
-- [ ] プロンプト設計・試行錯誤（人物画像+衣服画像→試着画像）
-- [ ] 結果の品質評価（体型保持、衣服忠実度、自然さ）
+### Step 1: プロンプト改善 + クリーン画像テスト ← 今ここ
+- [ ] テスト用のクリーンな画像を用意（測定テキスト・線なし）
+- [ ] 顔の同一性を保つプロンプトの試行錯誤
+- [ ] 構図（全身フレーミング）を維持するプロンプト改善
+- [ ] clothing / transfer 両モードで品質を再評価
 - [ ] 複数パターンテスト（体型・ポーズ・衣服種類の組み合わせ）
+- [ ] 「プロンプトだけでどこまで行けるか」の限界を見極める
 
-### Step 2: Vertex AI Virtual Try-On で比較テスト
+### Step 2: MediaPipe で顔マスク + ポーズ情報追加
+- [ ] MediaPipe Face Mesh (Apache 2.0) で顔領域検出
+- [ ] 顔領域をマスクして「変更禁止領域」として指定
+- [ ] MediaPipe Pose (Apache 2.0) で33点ランドマーク抽出
+- [ ] ポーズ情報をプロンプトに数値で追加（肩幅、身長比等）
+- [ ] Step 1 との精度比較・効果測定
+
+### Step 3: Graphonomy セグメンテーション追加（必要な場合のみ）
+- [ ] Graphonomy (MIT) で部位セグメンテーション
+- [ ] 衣服変更領域の正確な指定
+- [ ] 肌/髪/衣服の境界処理改善
+- [ ] Step 2 との精度比較・効果測定
+- [ ] 各ステップの処理時間を計測・記録
+
+### Step 4: Vertex AI Virtual Try-On との比較
 - [ ] GCP プロジェクトセットアップ
-- [ ] Vertex AI API 有効化
 - [ ] Virtual Try-On (`virtual-try-on-001`) で同じ画像セットをテスト
-- [ ] Nano Banana Pro との結果比較
+- [ ] Nano Banana パイプラインとの結果比較
 - [ ] コスト・精度・速度の総合評価
-- [ ] 最適なモデル（or ハイブリッド構成）を決定
+- [ ] 最適な構成を決定
 
-### Step 3: ライセンスクリーン化
-- [ ] **全コンポーネントを商用利用可能ライセンス (Apache 2.0 / MIT) に置き換え**
-  - [ ] OpenPose → MediaPipe Pose (Apache 2.0) に置き換え
-  - [ ] PASTA-GAN++ / StyleGAN2 → Nano Banana or VTO に置き換え
-  - [ ] Graphonomy (MIT) → そのまま利用OK
-  - [ ] 不要になった非商用コンポーネント (torch_utils/, dnnlib/, training/) を除去
-- [ ] 精度評価基準の策定
+### Step 5: ライセンスクリーン化
+- [ ] 不要になった非商用コンポーネント (torch_utils/, dnnlib/, training/) を除去
+- [ ] 全コンポーネントが商用利用可能 (Apache 2.0 / MIT) であることを最終確認
 
-### Phase 1 完了時の目標パイプライン
-```
-写真 → MediaPipe Pose (Apache 2.0)  → 体型・ポーズ情報抽出
-     → Graphonomy (MIT)              → 部位セグメンテーション
-     → Nano Banana or VTO            → 試着画像生成
-```
-※ 全ステップが商用利用可能なライセンスで構成されること
+### 判断基準
+各ステップで以下を評価し、改善が十分なら次のステップに進まない：
+- 顔の同一性 (最重要)
+- 体型・ポーズの保持
+- 衣服のフィット感・忠実度
+- 構図の維持
+- 処理時間
 
-## Phase 2: 精度向上
+## Phase 2: 精度向上（多様なケース対応）
 - [ ] 多様な体型への対応
 - [ ] 多様なポーズへの対応
 - [ ] 衣服テクスチャ・パターンの忠実度向上
@@ -57,13 +66,20 @@
 - [x] プロジェクトサイト (suzuki-shoten.dev) の内容確認
 - [x] 20260301bak のソース解析
 - [x] CLAUDE.md 作成
-- [x] docs/ フォルダ作成
-- [x] TODO.md 作成
+- [x] docs/ フォルダ作成・TODO.md 作成
 - [x] Bitbucket からソースコード取得
 - [x] GitHub リポジトリ作成・移行
 - [x] 有用な Claude skills のインストール
 - [x] プロジェクト履歴のドキュメント化
 - [x] ライセンス調査 (docs/04_license_audit.md)
+
+### Phase 1 初期テスト
+- [x] Nano Banana 調査 (docs/05_nano_banana_research.md)
+- [x] API Key 取得・セットアップ
+- [x] Nano Banana Pro で試着テスト (clothing + transfer 両モード)
+- [x] 初期テスト結果記録 (docs/06_tryon_test_results.md)
+- [x] **重要発見: Nano Banana のみで仮想試着が動作（中間処理不要）**
+- [x] **重要発見: ライセンス完全クリーンな状態で実現**
 
 ---
 *最終更新: 2026-03-01*
