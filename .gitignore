@@ -58,6 +58,10 @@ custom/data/
 20260301bak/
 key/
 
+# Test data (large image files)
+test_data/
+models/*.task
+
 # Environment
 .env
 .env.*

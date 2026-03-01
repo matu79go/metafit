@@ -94,6 +94,26 @@ meta_fit/
 - 「systematic-debugging でこのバグを調査して」
 - 「imagen で試着結果の画像を生成して」
 
+## 試着実行コマンド
+
+ユーザーが「試着実行して」「着せ替えして」等と指示したら、**ソースを調査せずに即座に以下のCLIを実行する**。
+
+```bash
+# transfer モード（着用モデルの服 → 別人に着せ替え）
+python3 try_on_test.py --mode transfer --person <ターゲット画像> --source <服の画像>
+
+# clothing モード（商品画像 → 人物に着せる）
+python3 try_on_test.py --mode clothing --person <人物画像> --clothing <商品画像>
+
+# 前処理あり（MediaPipe, 通常は不要）
+python3 try_on_test.py --mode transfer --person <ターゲット> --source <ソース> --preprocess
+```
+
+- テスト画像: `test_data/person/`
+- 結果出力先: `test_results/nano_banana/`
+- モデル: `gemini-3-pro-image-preview`
+- **中間処理は基本不要** - Gemini 単体で高品質（高解像度画像が前提）
+
 ## Key References
 - プロジェクトサイト: https://suzuki-shoten.dev/projects/metafit/
 - 旧実装: PF-AFN (2D), PIFu (3D), PASTA-GAN++
