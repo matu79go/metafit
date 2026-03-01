@@ -53,3 +53,11 @@ test_datas/
 test_results/
 *ipynb*
 custom/data/
+
+# Legacy backup and keys
+20260301bak/
+key/
+
+# Environment
+.env
+.env.*
