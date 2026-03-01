@@ -95,9 +95,11 @@ class Dataset(torch.utils.data.Dataset):
         self,
         name,  # Name of the dataset.
         raw_shape,  # Shape of the raw image data (NCHW).
-        max_size=None,  # Artificially limit the size of the dataset. None = no limit. Applied before xflip.
+        # Artificially limit the size of the dataset. None = no limit. Applied before xflip.
+        max_size=None,
         use_labels=False,  # Enable conditioning labels? False = label dimension is zero.
-        xflip=False,  # Artificially double the size of the dataset via x-flips. Applied after max_size.
+        # Artificially double the size of the dataset via x-flips. Applied after max_size.
+        xflip=False,
         random_seed=0,  # Random seed to use when applying max_size.
     ):
         self._name = name
@@ -1191,6 +1193,14 @@ class UvitonDatasetFull_512(Dataset):
             keypoints_data = json.load(f)
         if len(keypoints_data["people"]) == 0:
             keypoints = np.zeros((18, 3))
+        elif len(keypoints_data["people"][0]["pose_keypoints_2d"]) > 54:
+            keypoints_data["people"][0]["pose_keypoints_2d"] = [
+                x for i, x in enumerate(keypoints_data["people"][0][
+                    "pose_keypoints_2d"]) if i // 3 not in [8]
+            ][:54]
+            keypoints = np.array(
+                keypoints_data["people"][0]["pose_keypoints_2d"]
+            ).reshape(-1, 3)
         else:
             keypoints = np.array(
                 keypoints_data["people"][0]["pose_keypoints_2d"]
@@ -1686,7 +1696,7 @@ class UvitonDatasetFull_512(Dataset):
                     by = random.randint(ty + 1, h)
                     part_imgs_lower_for_train[0][ty:by, ...] *= 0
 
-        ######## debug
+        # debug
         # cv2.imwrite('z_debug_lower.png', lower_img[...,[2,1,0]])
         # cv2.imwrite('z_debug_lower_mask.png', lower_clothes_mask[...,[2,1,0]])
         # for ii, p in enumerate(part_imgs_lower_for_train):
@@ -2006,7 +2016,7 @@ class UvitonDatasetFull_512_test_full(Dataset):
             [skin_r_median, skin_g_median, skin_b_median], axis=2
         )
 
-        ##### clothes items
+        # clothes items
         fname = self._clothes_image_fnames[raw_idx]
         clothes_name = fname
         f = os.path.join(self._path, fname)
@@ -2323,6 +2333,14 @@ class UvitonDatasetFull_512_test_full(Dataset):
             keypoints_data = json.load(f)
         if len(keypoints_data["people"]) == 0:
             keypoints = np.zeros((18, 3))
+        elif len(keypoints_data["people"][0]["pose_keypoints_2d"]) > 54:
+            keypoints_data["people"][0]["pose_keypoints_2d"] = [
+                x for i, x in enumerate(keypoints_data["people"][0][
+                    "pose_keypoints_2d"]) if i // 3 not in [8]
+            ][:54]
+            keypoints = np.array(
+                keypoints_data["people"][0]["pose_keypoints_2d"]
+            ).reshape(-1, 3)
         else:
             keypoints = np.array(
                 keypoints_data["people"][0]["pose_keypoints_2d"]
@@ -3119,7 +3137,7 @@ class UvitonDatasetFull_512_test_upper(Dataset):
             upper_bound = lower_bbox[1]
             lower_clothes_upper_bound[upper_bound:, ...] += 255
 
-        ##### clothes items
+        # clothes items
         fname = self._clothes_image_fnames[raw_idx]
         clothes_name = fname
         f = os.path.join(self._path, fname)
@@ -3451,6 +3469,14 @@ class UvitonDatasetFull_512_test_upper(Dataset):
             keypoints_data = json.load(f)
         if len(keypoints_data["people"]) == 0:
             keypoints = np.zeros((18, 3))
+        elif len(keypoints_data["people"][0]["pose_keypoints_2d"]) > 54:
+            keypoints_data["people"][0]["pose_keypoints_2d"] = [
+                x for i, x in enumerate(keypoints_data["people"][0][
+                    "pose_keypoints_2d"]) if i // 3 not in [8]
+            ][:54]
+            keypoints = np.array(
+                keypoints_data["people"][0]["pose_keypoints_2d"]
+            ).reshape(-1, 3)
         else:
             keypoints = np.array(
                 keypoints_data["people"][0]["pose_keypoints_2d"]
@@ -4287,7 +4313,7 @@ class UvitonDatasetFull_512_test_lower(Dataset):
                 garment_parsing == 11
             ).astype(np.uint8)
 
-        ##### clothes items
+        # clothes items
         fname = self._clothes_image_fnames[raw_idx]
         clothes_name = fname
         f = os.path.join(self._path, fname)
@@ -4597,6 +4623,14 @@ class UvitonDatasetFull_512_test_lower(Dataset):
             keypoints_data = json.load(f)
         if len(keypoints_data["people"]) == 0:
             keypoints = np.zeros((18, 3))
+        elif len(keypoints_data["people"][0]["pose_keypoints_2d"]) > 54:
+            keypoints_data["people"][0]["pose_keypoints_2d"] = [
+                x for i, x in enumerate(keypoints_data["people"][0][
+                    "pose_keypoints_2d"]) if i // 3 not in [8]
+            ][:54]
+            keypoints = np.array(
+                keypoints_data["people"][0]["pose_keypoints_2d"]
+            ).reshape(-1, 3)
         else:
             keypoints = np.array(
                 keypoints_data["people"][0]["pose_keypoints_2d"]

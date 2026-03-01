@@ -10,8 +10,8 @@ import dnnlib
 from training import dataset as custom_dataset
 import src.legacy as legacy
 import src.utils as utils
-import src.generate_keypoints as generate_keypoints
-import src.graphonomy.generate_parsing as generate_parsing
+# import src.generate_keypoints as generate_keypoints
+# import src.graphonomy.generate_parsing as generate_parsing
 import src.preprocess as peroprocess
 
 
@@ -25,19 +25,19 @@ def main() -> None:
     peroprocess.main(
         data_dir=os.path.join(config["dataroot"], config["image_dir"]),
     )
-    print("Generating keypoints ...")
-    generate_keypoints.main(
-        data_dir=os.path.join(config["dataroot"], config["image_dir"]),
-        out_dir=os.path.join(config["dataroot"], config["keypoints_dir"]),
-        model_path=config["pose_model_path"],
-    )
+    # print("Generating keypoints ...")
+    # generate_keypoints.main(
+    #     data_dir=os.path.join(config["dataroot"], config["image_dir"]),
+    #     out_dir=os.path.join(config["dataroot"], config["keypoints_dir"]),
+    #     model_path=config["pose_model_path"],
+    # )
 
-    print("Generating parsing ...")
-    generate_parsing.main(
-        data_dir=os.path.join(config["dataroot"], config["image_dir"]),
-        out_dir=os.path.join(config["dataroot"], config["parsing_dir"]),
-        model_path=config["parsing_model_path"],
-    )
+    # print("Generating parsing ...")
+    # generate_parsing.main(
+    #     data_dir=os.path.join(config["dataroot"], config["image_dir"]),
+    #     out_dir=os.path.join(config["dataroot"], config["parsing_dir"]),
+    #     model_path=config["parsing_model_path"],
+    # )
 
     print("Generating images ...")
     with dnnlib.util.open_url(config["network"]) as f:
