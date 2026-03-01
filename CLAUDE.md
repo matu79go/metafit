@@ -69,6 +69,31 @@ meta_fit/
 └── .claude/skills/          # Claude Code skills
 ```
 
+## Claude Code Skills
+
+`.claude/skills/` に導入済み。自動発動するが、明示的に指示する場合は以下を参照。
+
+| カテゴリ | スキル | 用途 |
+|---------|--------|------|
+| テスト | `test-driven-development` | TDD (Red-Green-Refactor) でコードを書く |
+| テスト | `verification-before-completion` | タスク完了前にエビデンスベースの検証を強制 |
+| セキュリティ | `VibeSec-Skill` | セキュアコーディングの指針 |
+| セキュリティ | `owasp-security` | OWASP Top 10:2025 / ASVS 5.0 準拠 |
+| セキュリティ | `varlock` | シークレット漏洩防止 (.env, APIキー等) |
+| Python品質 | `modern-python` | uv, ruff, pyproject.toml 等のモダンPython規約 |
+| デバッグ | `systematic-debugging` | 体系的デバッグ (根本原因→仮説→検証) |
+| AI/ML | `pytorch-lightning` | PyTorch Lightning によるモデル管理 |
+| AI/ML | `transformers` | HuggingFace Transformers の利用指針 |
+| AI/ML | `imagen` | Gemini 画像生成 API 連携 |
+| 画像処理 | `image-enhancer` | 画像の高画質化・後処理 |
+| Web | `web-artifacts-builder` | React/Tailwind での Web UI 構築 |
+
+**使い方の例:**
+- 「VibeSec のルールでセキュリティチェックして」
+- 「TDD で書いて」
+- 「systematic-debugging でこのバグを調査して」
+- 「imagen で試着結果の画像を生成して」
+
 ## Key References
 - プロジェクトサイト: https://suzuki-shoten.dev/projects/metafit/
 - 旧実装: PF-AFN (2D), PIFu (3D), PASTA-GAN++
