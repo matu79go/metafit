@@ -7,16 +7,31 @@
 - [x] CLAUDE.md 作成
 - [x] docs/ フォルダ作成
 - [x] TODO.md 作成
-- [ ] Bitbucket からソースコード取得 (認証設定が必要)
+- [x] Bitbucket からソースコード取得
+- [x] GitHub リポジトリ作成・移行
 - [x] 有用な Claude skills のインストール
 - [x] プロジェクト履歴のドキュメント化
+- [x] ライセンス調査 (docs/04_license_audit.md)
 
-## Phase 1: Gemini Nano Banana による基盤構築
+## Phase 1: Nano Banana 基盤構築 + ライセンスクリーン化
 - [ ] Nano Banana の API 調査・セットアップ
 - [ ] 基本的な仮想試着プロンプトの設計
 - [ ] 簡易テスト（シンプルな写真での試着）
+- [ ] **全コンポーネントを商用利用可能ライセンス (Apache 2.0 / MIT) に置き換え**
+  - [ ] OpenPose → MediaPipe Pose (Apache 2.0) に置き換え
+  - [ ] PASTA-GAN++ / StyleGAN2 → Nano Banana API に置き換え
+  - [ ] Graphonomy (MIT) → そのまま利用OK
+  - [ ] 不要になった非商用コンポーネント (torch_utils/, dnnlib/, training/) を除去
 - [ ] 旧システム (PASTA-GAN++) との比較検証
 - [ ] 精度評価基準の策定
+
+### Phase 1 完了時の目標パイプライン
+```
+写真 → MediaPipe Pose (Apache 2.0)  → 体型・ポーズ情報抽出
+     → Graphonomy (MIT)              → 部位セグメンテーション
+     → Nano Banana API               → 試着画像生成
+```
+※ 全ステップが商用利用可能なライセンスで構成されること
 
 ## Phase 2: 精度向上
 - [ ] 多様な体型への対応
@@ -30,6 +45,7 @@
 - [ ] 処理速度の最適化
 - [ ] ユーザーテスト
 - [ ] 技術ブログ記事の完成
+- [ ] LICENSE ファイル作成（使用OSSの帰属を記載）
 
 ---
 *最終更新: 2026-03-01*
