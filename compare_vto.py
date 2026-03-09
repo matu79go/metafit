@@ -35,11 +35,13 @@ load_dotenv()
 OUTPUT_DIR = Path("test_results/comparison")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-# Vertex AI config
-VERTEX_PROJECT = "metafit-489710"
-VERTEX_LOCATION = "us-central1"
+# Vertex AI config - set via environment variables or .env
+VERTEX_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT", "")
+VERTEX_LOCATION = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
 VERTEX_MODEL = "virtual-try-on-001"
-VERTEX_CREDENTIALS = Path(__file__).parent / "configs" / "metafit-489710-6f5da50df8f4.json"
+VERTEX_CREDENTIALS = Path(
+    os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "configs/service-account.json")
+)
 
 # Nano Banana config
 NANO_MODEL = "gemini-3-pro-image-preview"
@@ -61,6 +63,11 @@ TEST_CASES = [
 
 def get_vertex_token() -> str:
     """Get access token from service account."""
+    if not VERTEX_PROJECT or not VERTEX_CREDENTIALS.exists():
+        raise RuntimeError(
+            "Vertex AI not configured. Set GOOGLE_CLOUD_PROJECT and "
+            "GOOGLE_APPLICATION_CREDENTIALS in .env"
+        )
     from google.oauth2 import service_account
     import google.auth.transport.requests
 

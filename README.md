@@ -2,7 +2,7 @@
 
 AI-powered virtual try-on system that generates realistic images of clothing on a user's body from a single photo.
 
-Three engines are available, from legacy GAN-based to modern API-based approaches.
+Two modern API-based engines and one legacy GAN-based engine are available.
 
 ## Important Notice
 
@@ -33,15 +33,15 @@ pip install google-genai python-dotenv pillow
 3. Create `.env` file in the project root:
 
 ```bash
-echo "GEMINI_API_KEY=your-api-key-here" > .env
+GEMINI_API_KEY=your-api-key-here
 ```
 
 #### Run Try-On
 
 ```bash
 # Clothing mode: product image -> person
-python3 try_on_test.py --person test_data/person/woman_standing3.jpg \
-                       --clothing test_data/clothing/tshirt_black.png
+python3 try_on_test.py --person test_data/person/woman_standing4.jpg \
+                       --clothing test_data/clothing/red_dress.jpg
 
 # Transfer mode: source person's clothes -> target person
 python3 try_on_test.py --mode transfer \
@@ -50,8 +50,8 @@ python3 try_on_test.py --mode transfer \
 
 # With MediaPipe preprocessing (usually not needed for high-res images)
 python3 try_on_test.py --mode transfer \
-                       --person test_data/person/woman_standing3.jpg \
-                       --source test_data/person/woman_standing5.jpg \
+                       --person test_data/person/man_standing.jpg \
+                       --source test_data/person/man_standing2.jpg \
                        --preprocess
 ```
 
@@ -80,23 +80,25 @@ pip install google-genai google-auth python-dotenv pillow
 3. **Create a Service Account**:
    - Go to: https://console.cloud.google.com/iam-admin/serviceaccounts
    - Click "Create Service Account"
-   - Name: `metafit-vto` (or any name)
+   - Name: any name (e.g., `vto-user`)
    - Grant role: **Vertex AI User** (`roles/aiplatform.user`)
 
 4. **Download JSON key**:
    - Click on the created service account
    - Go to "Keys" tab -> "Add Key" -> "Create new key" -> JSON
-   - Save the downloaded JSON file to `configs/` directory
+   - Save the downloaded JSON file to `configs/` directory (gitignored)
 
-5. **Update credentials path** in `test_vertex_vto.py`:
-   ```python
-   CREDENTIALS_PATH = Path(__file__).parent / "configs" / "your-key-file.json"
-   PROJECT_ID = "your-project-id"
-   ```
+5. **Configure `.env`**:
+
+```bash
+GOOGLE_CLOUD_PROJECT=your-project-id
+GOOGLE_CLOUD_LOCATION=us-central1
+GOOGLE_APPLICATION_CREDENTIALS=configs/your-key-file.json
+```
 
 > **Note**: GCP offers $300 free credit for new accounts. Virtual Try-On costs approximately $0.02-0.04 per image.
 
-> **Note**: If `gcloud auth application-default login` fails with scope errors, the service account method above is more reliable.
+> **Tip**: If `gcloud auth application-default login` fails with scope errors (common with older gcloud versions), the service account method above is more reliable.
 
 #### Run Try-On
 
@@ -105,46 +107,17 @@ pip install google-genai google-auth python-dotenv pillow
 python3 test_vertex_vto.py
 
 # Clothing mode (Vertex VTO's strength)
-python3 test_vertex_vto.py test_data/person/woman_standing3.jpg test_data/clothing/tshirt_black.png
+python3 test_vertex_vto.py test_data/person/woman_standing4.jpg test_data/clothing/red_dress.jpg
 
-# Generate multiple samples
-python3 test_vertex_vto.py test_data/person/woman_standing3.jpg test_data/clothing/red_dress.jpg 4
+# Generate multiple samples (up to 4)
+python3 test_vertex_vto.py test_data/person/man_standing.jpg test_data/clothing/hoodie.jpg 4
 ```
 
 Results are saved to `test_results/vertex_vto/`.
 
 ---
 
-### Option C: Comparison Tool (Nano Banana vs Vertex VTO vs PASTA-GAN++)
-
-Side-by-side comparison of all engines.
-
-```bash
-# 2-way comparison: Nano Banana vs Vertex VTO
-python3 compare_vto.py --person test_data/person/woman_standing3.jpg \
-                       --clothing test_data/clothing/tshirt_black.png
-
-# Transfer mode comparison
-python3 compare_vto.py --mode transfer \
-                       --person test_data/person/woman_standing3.jpg \
-                       --source test_data/person/woman_standing5.jpg
-
-# 3-way comparison with PASTA-GAN++ legacy results
-python3 compare_vto.py --mode transfer \
-                       --person test_data/person/man110.jpg \
-                       --source test_data/person/man11.jpg \
-                       --pasta "20260301bak/Pythonコード/metafit_dev/test_results/full/man110___man11.png"
-
-# Skip one engine
-python3 compare_vto.py --person <img> --clothing <img> --nano-only
-python3 compare_vto.py --person <img> --clothing <img> --vertex-only
-```
-
-Results are saved to `test_results/comparison/` as side-by-side comparison images.
-
----
-
-### Option D: PASTA-GAN++ (Legacy)
+### Option C: PASTA-GAN++ (Legacy)
 
 > **WARNING**: This is the legacy GAN-based approach. It requires GPU (NVIDIA CUDA), Docker, and large model weights (~3GB). The results are significantly inferior to Nano Banana / Vertex VTO. Included for research comparison purposes only.
 
@@ -218,11 +191,9 @@ use_sleeve_mask: false
 
 ## Test Data
 
-Test images are stored in `test_data/` (gitignored due to size).
-
 ### Person images (`test_data/person/`)
 
-Various body types, poses, and genders for comprehensive testing.
+Various body types, poses, and genders for comprehensive testing. All images are from [Unsplash](https://unsplash.com) (free for commercial use, no attribution required).
 
 ### Clothing images (`test_data/clothing/`)
 
@@ -230,18 +201,16 @@ Various body types, poses, and genders for comprehensive testing.
 |------|------|--------|
 | `tshirt_black.png` | Black T-shirt | - |
 | `sckirt.png` | Skirt | - |
-| `red_dress.jpg` | Red dress | [Unsplash](https://unsplash.com) (free, commercial OK) |
-| `denim_jacket.jpg` | Denim jacket | [Unsplash](https://unsplash.com) (free, commercial OK) |
-| `hoodie.jpg` | Grey hoodie | [Unsplash](https://unsplash.com) (free, commercial OK) |
-| `jeans.jpg` | Jeans | [Unsplash](https://unsplash.com) (free, commercial OK) |
-| `striped_shirt.jpg` | Striped shirt | [Unsplash](https://unsplash.com) (free, commercial OK) |
-| `suit_blazer.jpg` | Navy suit | [Unsplash](https://unsplash.com) (free, commercial OK) |
+| `red_dress.jpg` | Red dress | [Unsplash](https://unsplash.com) |
+| `denim_jacket.jpg` | Denim jacket | [Unsplash](https://unsplash.com) |
+| `hoodie.jpg` | Grey hoodie | [Unsplash](https://unsplash.com) |
+| `jeans.jpg` | Jeans | [Unsplash](https://unsplash.com) |
+| `striped_shirt.jpg` | Striped shirt | [Unsplash](https://unsplash.com) |
+| `suit_blazer.jpg` | Navy suit | [Unsplash](https://unsplash.com) |
 
 ---
 
 ## Engine Comparison
-
-See [docs/07_vertex_vto_comparison.md](docs/07_vertex_vto_comparison.md) for detailed test results.
 
 | Feature | PASTA-GAN++ (Legacy) | Nano Banana (Current) | Vertex AI VTO |
 |---------|---------------------|----------------------|---------------|
@@ -288,7 +257,7 @@ The following components are included for **research and educational purposes on
 
 ### For Commercial Use
 
-If you plan to use this project commercially, use **only** the Nano Banana (`try_on_test.py`) and/or Vertex AI VTO (`test_vertex_vto.py`, `compare_vto.py`) pipelines. These do not depend on any non-commercial components.
+If you plan to use this project commercially, use **only** the Nano Banana (`try_on_test.py`) and/or Vertex AI VTO (`test_vertex_vto.py`) pipelines. These do not depend on any non-commercial components.
 
 ```
 Commercial-safe pipeline:
@@ -299,23 +268,7 @@ NOT commercial-safe:
   Photo -> OpenPose -> PASTA-GAN++ -> Try-on image      NG
 ```
 
-See [docs/04_license_audit.md](docs/04_license_audit.md) for the full license analysis.
-
 ---
-
-## Project Documentation
-
-| Document | Description |
-|----------|-------------|
-| [CLAUDE.md](CLAUDE.md) | Project rules and conventions |
-| [docs/TODO.md](docs/TODO.md) | Task management |
-| [docs/01_project_history.md](docs/01_project_history.md) | Project history (PF-AFN -> PIFu -> PASTA-GAN++ -> Nano Banana) |
-| [docs/02_architecture_overview.md](docs/02_architecture_overview.md) | System architecture |
-| [docs/03_tech_blog_draft.md](docs/03_tech_blog_draft.md) | Tech blog draft |
-| [docs/04_license_audit.md](docs/04_license_audit.md) | License audit |
-| [docs/05_nano_banana_research.md](docs/05_nano_banana_research.md) | Nano Banana / Vertex AI VTO research |
-| [docs/06_tryon_test_results.md](docs/06_tryon_test_results.md) | Nano Banana test results |
-| [docs/07_vertex_vto_comparison.md](docs/07_vertex_vto_comparison.md) | 3-engine comparison (PASTA-GAN++ vs Nano Banana vs Vertex VTO) |
 
 ## Project Site
 

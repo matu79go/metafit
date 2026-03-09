@@ -10,11 +10,23 @@ import google.auth
 import google.auth.transport.requests
 from google.oauth2 import service_account
 
-# Config
-PROJECT_ID = "metafit-489710"
-LOCATION = "us-central1"
+# Config - set these via environment variables or .env file
+from dotenv import load_dotenv
+load_dotenv()
+
+PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT", "")
+LOCATION = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
 MODEL = "virtual-try-on-001"
-CREDENTIALS_PATH = Path(__file__).parent / "configs" / "metafit-489710-6f5da50df8f4.json"
+CREDENTIALS_PATH = Path(
+    os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "configs/service-account.json")
+)
+
+if not PROJECT_ID:
+    print("Error: Set GOOGLE_CLOUD_PROJECT in .env or environment")
+    print("Example .env:")
+    print('  GOOGLE_CLOUD_PROJECT=your-project-id')
+    print('  GOOGLE_APPLICATION_CREDENTIALS=configs/your-key.json')
+    sys.exit(1)
 ENDPOINT = (
     f"https://{LOCATION}-aiplatform.googleapis.com/v1/"
     f"projects/{PROJECT_ID}/locations/{LOCATION}/"
