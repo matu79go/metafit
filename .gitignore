@@ -58,10 +58,13 @@ custom/data/
 20260301bak/
 key/
 
-# Test data (large image files)
-test_data/
+# Test data (copyright-restricted images)
+test_data/person_backup/
 models/*.task
 
 # Environment
 .env
 .env.*
+
+# GCP service account keys
+configs/*-*.json

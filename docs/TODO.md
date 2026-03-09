@@ -19,12 +19,16 @@
 ### Step 3: Graphonomy → スキップ
 - ~~Graphonomy セグメンテーション~~ → Gemini 単体で十分なため不要
 
-### Step 4: Vertex AI Virtual Try-On との比較 ← 次はここ
-- [ ] GCP プロジェクトセットアップ
-- [ ] Virtual Try-On (`virtual-try-on-001`) で同じ画像セットをテスト
-- [ ] Nano Banana パイプラインとの結果比較
-- [ ] コスト・精度・速度の総合評価
-- [ ] 最適な構成を決定
+### Step 4: Vertex AI Virtual Try-On との比較 (進行中)
+- [x] GCP プロジェクトセットアップ (`metafit-489710`, サービスアカウント方式)
+- [x] Virtual Try-On (`virtual-try-on-001`) で試着テスト成功
+- [x] Nano Banana vs Vertex VTO 比較テスト実施 (docs/07_vertex_vto_comparison.md)
+- [x] **重要発見: transfer モードは Nano Banana が優位（服デザイン抽出が正確）**
+- [x] **重要発見: 靴の着せ替えは Vertex VTO が優位**
+- [x] **重要発見: ハイブリッド戦略が最適**
+- [ ] clothing モード（商品画像）での詳細比較
+- [ ] 処理速度・コストの計測比較
+- [ ] 最適な構成を最終決定
 
 ### Step 5: ライセンスクリーン化
 - [ ] 不要になった非商用コンポーネント (torch_utils/, dnnlib/, training/) を除去
@@ -79,6 +83,8 @@
 - [x] **重要発見: 高解像度画像 + Gemini 単体で仮想試着は十分な品質**
 - [x] **重要発見: ライセンス完全クリーンな状態で実現**
 - [x] **重要発見: 中間処理（MediaPipe）は基本不要**
+- [x] Vertex AI VTO セットアップ・初期比較テスト (docs/07_vertex_vto_comparison.md)
+- [x] 比較テストスクリプト作成 (`compare_vto.py`)
 
 ---
-*最終更新: 2026-03-01*
+*最終更新: 2026-03-09*

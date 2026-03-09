@@ -1,54 +1,322 @@
 # META FIT - AI Virtual Try-On
 
-> **Note: This project is for non-commercial research and educational purposes only.**
-> The current codebase incorporates components under non-commercial licenses
-> (NVIDIA StyleGAN2, PASTA-GAN++, OpenPose). See [docs/04_license_audit.md](docs/04_license_audit.md) for details.
-
 AI-powered virtual try-on system that generates realistic images of clothing on a user's body from a single photo.
 
-## Setup
+Three engines are available, from legacy GAN-based to modern API-based approaches.
 
-### Clone repo
-```
-git clone https://github.com/matu79go/metafit.git
+## Important Notice
+
+> **This repository contains components under different licenses.**
+> - **PASTA-GAN++ (legacy)**: Non-commercial research and educational purposes only. See [License Notice](#license-notice) below.
+> - **Nano Banana / Vertex AI VTO (current)**: Commercial use allowed under Google API terms.
+>
+> Please read the license section carefully before using any part of this project.
+
+---
+
+## Quick Start
+
+### Option A: Nano Banana (Recommended)
+
+The simplest and most capable option. Uses Gemini API for virtual try-on.
+
+#### Prerequisites
+
+```bash
+pip install google-genai python-dotenv pillow
 ```
 
-### Download test data and weights:
-https://drive.google.com/drive/folders/17Q3TsWovNJWrC7VR389AvHVG5Mpve6sn?usp=share_link
+#### Get API Key
 
-### Build docker image:
-```
-make build
-```
+1. Go to [Google AI Studio](https://aistudio.google.com/apikey)
+2. Create an API key
+3. Create `.env` file in the project root:
 
-### Run docker container:
-```
-make run
+```bash
+echo "GEMINI_API_KEY=your-api-key-here" > .env
 ```
 
-### Run inference
+#### Run Try-On
+
+```bash
+# Clothing mode: product image -> person
+python3 try_on_test.py --person test_data/person/woman_standing3.jpg \
+                       --clothing test_data/clothing/tshirt_black.png
+
+# Transfer mode: source person's clothes -> target person
+python3 try_on_test.py --mode transfer \
+                       --person test_data/person/woman_standing3.jpg \
+                       --source test_data/person/woman_standing5.jpg
+
+# With MediaPipe preprocessing (usually not needed for high-res images)
+python3 try_on_test.py --mode transfer \
+                       --person test_data/person/woman_standing3.jpg \
+                       --source test_data/person/woman_standing5.jpg \
+                       --preprocess
 ```
-python3 test.py --config configs/test_config.yaml
+
+Results are saved to `test_results/nano_banana/`.
+
+---
+
+### Option B: Vertex AI Virtual Try-On
+
+Google's dedicated virtual try-on model. Best for clothing product images (flat lay / white background).
+
+#### Prerequisites
+
+```bash
+pip install google-genai google-auth python-dotenv pillow
 ```
+
+#### GCP Setup
+
+1. **Create a GCP project** (or use an existing one) at [Google Cloud Console](https://console.cloud.google.com)
+
+2. **Enable Vertex AI API**:
+   - Go to: https://console.cloud.google.com/apis/library/aiplatform.googleapis.com
+   - Click "Enable"
+
+3. **Create a Service Account**:
+   - Go to: https://console.cloud.google.com/iam-admin/serviceaccounts
+   - Click "Create Service Account"
+   - Name: `metafit-vto` (or any name)
+   - Grant role: **Vertex AI User** (`roles/aiplatform.user`)
+
+4. **Download JSON key**:
+   - Click on the created service account
+   - Go to "Keys" tab -> "Add Key" -> "Create new key" -> JSON
+   - Save the downloaded JSON file to `configs/` directory
+
+5. **Update credentials path** in `test_vertex_vto.py`:
+   ```python
+   CREDENTIALS_PATH = Path(__file__).parent / "configs" / "your-key-file.json"
+   PROJECT_ID = "your-project-id"
+   ```
+
+> **Note**: GCP offers $300 free credit for new accounts. Virtual Try-On costs approximately $0.02-0.04 per image.
+
+> **Note**: If `gcloud auth application-default login` fails with scope errors, the service account method above is more reliable.
+
+#### Run Try-On
+
+```bash
+# Connection test
+python3 test_vertex_vto.py
+
+# Clothing mode (Vertex VTO's strength)
+python3 test_vertex_vto.py test_data/person/woman_standing3.jpg test_data/clothing/tshirt_black.png
+
+# Generate multiple samples
+python3 test_vertex_vto.py test_data/person/woman_standing3.jpg test_data/clothing/red_dress.jpg 4
+```
+
+Results are saved to `test_results/vertex_vto/`.
+
+---
+
+### Option C: Comparison Tool (Nano Banana vs Vertex VTO vs PASTA-GAN++)
+
+Side-by-side comparison of all engines.
+
+```bash
+# 2-way comparison: Nano Banana vs Vertex VTO
+python3 compare_vto.py --person test_data/person/woman_standing3.jpg \
+                       --clothing test_data/clothing/tshirt_black.png
+
+# Transfer mode comparison
+python3 compare_vto.py --mode transfer \
+                       --person test_data/person/woman_standing3.jpg \
+                       --source test_data/person/woman_standing5.jpg
+
+# 3-way comparison with PASTA-GAN++ legacy results
+python3 compare_vto.py --mode transfer \
+                       --person test_data/person/man110.jpg \
+                       --source test_data/person/man11.jpg \
+                       --pasta "20260301bak/Pythonコード/metafit_dev/test_results/full/man110___man11.png"
+
+# Skip one engine
+python3 compare_vto.py --person <img> --clothing <img> --nano-only
+python3 compare_vto.py --person <img> --clothing <img> --vertex-only
+```
+
+Results are saved to `test_results/comparison/` as side-by-side comparison images.
+
+---
+
+### Option D: PASTA-GAN++ (Legacy)
+
+> **WARNING**: This is the legacy GAN-based approach. It requires GPU (NVIDIA CUDA), Docker, and large model weights (~3GB). The results are significantly inferior to Nano Banana / Vertex VTO. Included for research comparison purposes only.
+
+> **LICENSE**: PASTA-GAN++ and its dependencies (StyleGAN2, OpenPose) are **non-commercial research only**. Do NOT use for commercial purposes.
+
+#### Prerequisites
+
+- NVIDIA GPU with CUDA support
+- Docker with [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
+- Model weights (download from Google Drive link below)
+
+#### Setup
+
+1. **Download test data and model weights**:
+
+   https://drive.google.com/drive/folders/17Q3TsWovNJWrC7VR389AvHVG5Mpve6sn?usp=share_link
+
+   Place them so the directory structure looks like:
+   ```
+   metafit/
+   ├── weights/
+   │   ├── pasta-gan++/network-snapshot-004408.pkl
+   │   ├── openpose/body_pose_model.pth
+   │   └── graphonomy/inference.pth
+   └── test_datas/
+       └── image/  (test images, 320x512px, white background)
+   ```
+
+2. **Build Docker image**:
+   ```bash
+   make build
+   ```
+
+3. **Run Docker container**:
+   ```bash
+   make run
+   ```
+
+4. **Configure test pairs** in `test_datas/test_pairs.txt`:
+   ```
+   target_person.jpg source_model.jpg
+   ```
+
+5. **Run inference**:
+   ```bash
+   python3 test.py --config configs/test_config.yaml
+   ```
+
+   Results are saved to `test_results/full/`.
+
+#### Test Configuration
+
+Edit `configs/test_config.yaml`:
+```yaml
+dataroot: test_datas
+testtxt: test_pairs.txt
+network: weights/pasta-gan++/network-snapshot-004408.pkl
+outdir: test_results/full
+batchsize: 1
+testpart: full          # full / upper / lower
+use_sleeve_mask: false
+```
+
+#### Input Requirements
+
+- Image size: **320x512 pixels** (width x height)
+- Full-length photo on **white background**
+- Supported parts: full body, upper body, lower body
+
+---
+
+## Test Data
+
+Test images are stored in `test_data/` (gitignored due to size).
+
+### Person images (`test_data/person/`)
+
+Various body types, poses, and genders for comprehensive testing.
+
+### Clothing images (`test_data/clothing/`)
+
+| File | Type | Source |
+|------|------|--------|
+| `tshirt_black.png` | Black T-shirt | - |
+| `sckirt.png` | Skirt | - |
+| `red_dress.jpg` | Red dress | [Unsplash](https://unsplash.com) (free, commercial OK) |
+| `denim_jacket.jpg` | Denim jacket | [Unsplash](https://unsplash.com) (free, commercial OK) |
+| `hoodie.jpg` | Grey hoodie | [Unsplash](https://unsplash.com) (free, commercial OK) |
+| `jeans.jpg` | Jeans | [Unsplash](https://unsplash.com) (free, commercial OK) |
+| `striped_shirt.jpg` | Striped shirt | [Unsplash](https://unsplash.com) (free, commercial OK) |
+| `suit_blazer.jpg` | Navy suit | [Unsplash](https://unsplash.com) (free, commercial OK) |
+
+---
+
+## Engine Comparison
+
+See [docs/07_vertex_vto_comparison.md](docs/07_vertex_vto_comparison.md) for detailed test results.
+
+| Feature | PASTA-GAN++ (Legacy) | Nano Banana (Current) | Vertex AI VTO |
+|---------|---------------------|----------------------|---------------|
+| **Approach** | GAN (local GPU) | Gemini API (cloud) | Dedicated VTO model (cloud) |
+| **Clothing mode** (product -> person) | N/A | Good | **Best** (faithful reproduction) |
+| **Transfer mode** (person -> person) | Poor | **Best** | Not supported |
+| **Body type diversity** | Poor (slim bias) | **Best** (faithful) | Good |
+| **Complex patterns** | Poor | **Best** | Good |
+| **Shoes** | N/A | Poor | **Best** |
+| **Safety filter** | None (local) | Strict (blocks exposed clothing) | Moderate (inconsistent) |
+| **Setup complexity** | High (GPU + Docker) | Low (API key only) | Medium (GCP project) |
+| **Cost** | Free (local) | Free tier available | ~$0.02-0.04/image |
+| **Commercial use** | **No** | Yes | Yes |
+
+---
+
+## License Notice
+
+### Non-Commercial Components (PASTA-GAN++ legacy pipeline)
+
+The following components are included for **research and educational purposes only**. They **MUST NOT** be used for commercial purposes:
+
+| Component | License | Repository |
+|-----------|---------|------------|
+| [PASTA-GAN++](https://github.com/xiezhy6/PASTA-GAN) | Non-commercial research only | Try-on generation |
+| [StyleGAN2](https://github.com/NVlabs/stylegan2-ada-pytorch) (NVIDIA) | NVIDIA Source Code License-NC | Generator backbone |
+| [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose) (CMU) | CMU Academic Non-Commercial | Pose estimation |
+
+**Affected directories**: `torch_utils/`, `dnnlib/`, `training/`, `src/generate_keypoints.py`, `src/body.py`
+
+> If you wish to use OpenPose commercially, a license is available through [CMU FlintBox](https://cmu.flintbox.com/technologies/b820c21d-8571-4d6a-9bc6-efce58076e3a) (~$25,000/year).
+
+### Commercial-Friendly Components
+
+| Component | License | Usage |
+|-----------|---------|-------|
+| [Graphonomy](https://github.com/Gaoyiminggithub/Graphonomy) | MIT | Body segmentation |
+| [MediaPipe](https://github.com/google-ai-edge/mediapipe) | Apache 2.0 | Face/Pose detection |
+| [PyTorch](https://github.com/pytorch/pytorch) | BSD | ML framework |
+| [OpenCV](https://github.com/opencv/opencv) | Apache 2.0 | Image processing |
+| [Pillow](https://github.com/python-pillow/Pillow) | MIT-like (HPND) | Image processing |
+| Gemini API (Nano Banana) | [Google API Terms](https://ai.google.dev/gemini-api/terms) | Try-on generation |
+| Vertex AI VTO | [Google Cloud Terms](https://cloud.google.com/terms) | Try-on generation |
+
+### For Commercial Use
+
+If you plan to use this project commercially, use **only** the Nano Banana (`try_on_test.py`) and/or Vertex AI VTO (`test_vertex_vto.py`, `compare_vto.py`) pipelines. These do not depend on any non-commercial components.
+
+```
+Commercial-safe pipeline:
+  Photo -> Gemini API (Nano Banana) -> Try-on image     OK
+  Photo -> Vertex AI VTO API        -> Try-on image     OK
+
+NOT commercial-safe:
+  Photo -> OpenPose -> PASTA-GAN++ -> Try-on image      NG
+```
+
+See [docs/04_license_audit.md](docs/04_license_audit.md) for the full license analysis.
+
+---
 
 ## Project Documentation
-- [CLAUDE.md](CLAUDE.md) - Project rules and conventions
-- [docs/TODO.md](docs/TODO.md) - Task management
-- [docs/01_project_history.md](docs/01_project_history.md) - Project history
-- [docs/02_architecture_overview.md](docs/02_architecture_overview.md) - Architecture overview
-- [docs/03_tech_blog_draft.md](docs/03_tech_blog_draft.md) - Tech blog draft
-- [docs/04_license_audit.md](docs/04_license_audit.md) - License audit
 
-## Third-Party Licenses
+| Document | Description |
+|----------|-------------|
+| [CLAUDE.md](CLAUDE.md) | Project rules and conventions |
+| [docs/TODO.md](docs/TODO.md) | Task management |
+| [docs/01_project_history.md](docs/01_project_history.md) | Project history (PF-AFN -> PIFu -> PASTA-GAN++ -> Nano Banana) |
+| [docs/02_architecture_overview.md](docs/02_architecture_overview.md) | System architecture |
+| [docs/03_tech_blog_draft.md](docs/03_tech_blog_draft.md) | Tech blog draft |
+| [docs/04_license_audit.md](docs/04_license_audit.md) | License audit |
+| [docs/05_nano_banana_research.md](docs/05_nano_banana_research.md) | Nano Banana / Vertex AI VTO research |
+| [docs/06_tryon_test_results.md](docs/06_tryon_test_results.md) | Nano Banana test results |
+| [docs/07_vertex_vto_comparison.md](docs/07_vertex_vto_comparison.md) | 3-engine comparison (PASTA-GAN++ vs Nano Banana vs Vertex VTO) |
 
-This project uses the following open source software:
+## Project Site
 
-| Component | License | Commercial Use |
-|-----------|---------|---------------|
-| [StyleGAN2](https://github.com/NVlabs/stylegan2-ada-pytorch) (NVIDIA) | NVIDIA Source Code License-NC | Non-commercial only |
-| [PASTA-GAN++](https://github.com/xiezhy6/PASTA-GAN) | Non-commercial research only | Non-commercial only |
-| [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose) (CMU) | CMU Academic Non-Commercial | Non-commercial only |
-| [Graphonomy](https://github.com/Gaoyiminggithub/Graphonomy) | MIT | Allowed |
-| [Synchronized-BatchNorm](https://github.com/vacancy/Synchronized-BatchNorm-PyTorch) | MIT | Allowed |
-| [PyTorch](https://github.com/pytorch/pytorch) | BSD | Allowed |
-| [OpenCV](https://github.com/opencv/opencv) | Apache 2.0 | Allowed |
+https://suzuki-shoten.dev/projects/metafit/
