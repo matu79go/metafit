@@ -71,7 +71,6 @@ configs/*-*.json
 
 # Claude Code internal config
 .claude/
-CLAUDE.md
 
 # Internal docs (published via blog, not raw)
 docs/
